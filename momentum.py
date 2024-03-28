@@ -2,23 +2,25 @@
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
 import matplotlib.pyplot as plt
+from readcsv import parsedata
 
+stockdata = parsedata('2018','GP' ,'2018-01-01', '2018-12-31')
 
 # Function to calculate momentum
 def calculate_momentum(prices, lookback_period):
     momentum = (prices - prices.shift(lookback_period)) / prices.shift(lookback_period)
+    # price of stock 50 days before minus from price today
     return momentum
 
 # Function to implement momentum trading strategy
 def momentum_trading(ticker, start_date, end_date, lookback_period, buy_threshold, sell_threshold):
     # Download historical data
-    data = yf.download(ticker, start=start_date, end=end_date)
+    data = parsedata('2018', ticker ,start_date , end_date)
     print(data)
     
     # Calculate momentum
-    data['Momentum'] = calculate_momentum(data['Adj Close'], lookback_period)
+    data['Momentum'] = calculate_momentum(data['close'], lookback_period)
     
     # Initialize positions
     data['Position'] = 0
@@ -29,22 +31,22 @@ def momentum_trading(ticker, start_date, end_date, lookback_period, buy_threshol
     # Sell signal: momentum < sell_threshold
     data.loc[ data['Momentum'] < sell_threshold, 'Position'] = -1
     
-    # Calculate daily returns
-    data['Returns'] = data['Adj Close'].pct_change()
+    # Calculate daily returns : .pct_change() method is used to calculate 
+    # the percentage change between the current and the previous element in a Series or DataFrame
+    data['Returns'] = data['close'].pct_change()
     
-    # Calculate strategy returns
+    # strategy return :  multiplying yesterday's position with today's returns.
     data['Strategy Returns'] = data['Position'].shift(1) * data['Returns']
     
     # Calculate cumulative returns
     data['Cumulative Returns'] = (data['Strategy Returns'] + 1).cumprod()
-    
     return data
 
 # Example usage
 if __name__ == "__main__":
-    ticker = 'AAPL'
-    start_date = '2020-01-01'
-    end_date = '2022-01-01'
+    ticker = 'GP'
+    start_date = '2018-01-01'
+    end_date = '2018-12-01'
     lookback_period = 50  #Number of trading days used to calculate momentum
     buy_threshold = 0.05  # Buy if momentum > 5%
     sell_threshold = -0.05  # Sell if momentum < -5%
