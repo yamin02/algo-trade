@@ -14,10 +14,10 @@ def calculate_momentum(prices, lookback_period):
     return momentum
 
 # Function to implement momentum trading strategy
-def momentum_trading(ticker, start_date, end_date, lookback_period, buy_threshold, sell_threshold):
+def momentum_trading(year,ticker, start_date, end_date, lookback_period, buy_threshold, sell_threshold):
     # Download historical data
-    data = parsedata('2018', ticker ,start_date , end_date)
-    print(data)
+    data = parsedata(year, ticker ,start_date , end_date)
+    print('Data parsed')
     
     # Calculate momentum
     data['Momentum'] = calculate_momentum(data['close'], lookback_period)
@@ -44,17 +44,18 @@ def momentum_trading(ticker, start_date, end_date, lookback_period, buy_threshol
 
 # Example usage
 if __name__ == "__main__":
-    ticker = 'GP'
+    ticker = 'BATBC'
+    year= '2018'
     start_date = '2018-01-01'
     end_date = '2018-12-01'
     lookback_period = 50  #Number of trading days used to calculate momentum
     buy_threshold = 0.05  # Buy if momentum > 5%
     sell_threshold = -0.05  # Sell if momentum < -5%
     
-    strategy_data = momentum_trading(ticker, start_date, end_date, lookback_period, buy_threshold, sell_threshold)
+    strategy_data = momentum_trading(year,ticker, start_date, end_date, lookback_period, buy_threshold, sell_threshold)
     
     # Plot cumulative returns
     plt.figure(figsize=(10, 6))
-    strategy_data['Cumulative Returns'].plot(title='Momentum Trading Strategy')
-    plt.savefig('momentum_trading_plot.jpg', format='jpg')
+    strategy_data['Cumulative Returns'].plot(title=f'Momentum Trading Strategy {year} {ticker}' )
+    plt.savefig(f'./plots/momentum_trading_plot_{ticker}_{year}.jpg', format='jpg')
     
